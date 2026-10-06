@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "monke.t3-board",
+  "name": "T3 Board",
+  "version": "1.0.0",
+  "description": "Keyboard lighting and live T3 agent status.",
+  "kinds": ["bar-widget"],
+  "activation": "on-demand",
+  "entryPoints": { "barWidget": "BarWidget.qml" },
+  "barWidget": {
+    "displayName": "T3 Board",
+    "description": "Open keyboard controls or pause and resume lighting.",
+    "category": "AI",
+    "allowMultiple": false
+  }
+}

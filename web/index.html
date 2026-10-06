@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <title>T3 Board</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="T3 Board home"
+          ><span class="mark">t3</span><span class="wordmark">Board</span></a
+        >
+        <span class="device">AJAZZ AK820 Pro<span>ANSI 81 · USB</span></span>
+        <p class="connection" role="status">
+          <i id="connection-dot" aria-hidden="true"></i
+          ><span id="connection">Connecting…</span>
+        </p>
+      </header>
+
+      <main>
+        <section class="stage-section" aria-labelledby="title">
+          <div class="headline">
+            <div class="headline-text">
+              <h1 id="title">Agent lights</h1>
+              <p id="summary" class="summary">Waiting for T3 Code</p>
+            </div>
+            <div class="controls">
+              <label class="switch" for="demo"
+                ><input id="demo" type="checkbox" role="switch" /><span
+                  class="track"
+                  aria-hidden="true"
+                ></span
+                >Simulation</label
+              >
+              <button id="start" class="primary" type="button">
+                Start lighting
+              </button>
+              <button id="stop" type="button" hidden>Stop lighting</button>
+              <span class="sim-tools">
+                <button id="draft-test" type="button" hidden>
+                  Preview drafting
+                </button>
+                <button id="send-test" type="button" hidden>
+                  Preview sent
+                </button>
+              </span>
+              <p id="start-hint" class="control-hint"></p>
+            </div>
+          </div>
+
+          <div id="notice" role="status" aria-live="polite" hidden></div>
+
+          <div class="keyboard-scroll">
+            <div class="stage-wrap">
+              <div
+                id="keyboard"
+                class="stage"
+                role="group"
+                aria-label="AK820 Pro keyboard preview"
+              ></div>
+            </div>
+          </div>
+
+          <p class="scroll-hint">Swipe the keyboard to see all of it.</p>
+          <div class="readout">
+            <div id="inspector" class="inspector" aria-live="polite">
+              <span id="inspect-key" class="inspect-key">·</span>
+              <div class="inspect-body">
+                <p id="inspect-title" class="inspect-title">
+                  Select a key on the top row
+                </p>
+                <p id="inspect-detail" class="inspect-detail">
+                  Lit keys carry an agent. Dark keys are free.
+                </p>
+              </div>
+              <span id="inspect-status" class="status-chip" hidden
+                ><i class="dot" aria-hidden="true"></i
+                ><span id="inspect-status-label"></span
+              ></span>
+              <button id="inspect-release" type="button" hidden>
+                Release key
+              </button>
+            </div>
+            <label class="brightness" for="brightness">
+              <span>Brightness</span>
+              <input
+                id="brightness"
+                type="range"
+                min="5"
+                max="100"
+                value="55"
+              />
+              <output id="brightness-value" for="brightness">55%</output>
+            </label>
+          </div>
+          <p id="board-caption" class="caption">
+            Esc, F1 to F12 and Delete show agent status. The other keys follow
+            Body lighting below. The knob and display are drawn for reference
+            and are not controlled.
+          </p>
+
+          <section class="body-light" aria-labelledby="body-title">
+            <div class="section-heading">
+              <h2 id="body-title">Body lighting</h2>
+              <i id="body-summary" class="body-chip" aria-hidden="true"></i>
+              <span class="count">Other keys</span>
+              <span class="body-tools">
+                <span
+                  id="body-state"
+                  class="body-state"
+                  aria-hidden="true"
+                ></span>
+                <span id="body-live" class="sr-only" role="status"></span>
+                <button id="body-reset" class="quiet" type="button">
+                  Reset to white
+                </button>
+              </span>
+            </div>
+
+            <fieldset id="body-controls" class="body-grid" disabled>
+              <legend class="sr-only">Body lighting controls</legend>
+              <div class="body-main">
+                <div class="field">
+                  <span id="mode-label" class="field-label">Effect</span>
+                  <div
+                    id="body-mode"
+                    class="segmented"
+                    role="radiogroup"
+                    aria-labelledby="mode-label"
+                  ></div>
+                  <p id="mode-note" class="field-note"></p>
+                </div>
+                <div id="field-direction" class="field" hidden>
+                  <span id="direction-label" class="field-label"
+                    >Direction</span
+                  >
+                  <div
+                    id="body-direction"
+                    class="segmented directions"
+                    role="radiogroup"
+                    aria-labelledby="direction-label"
+                  ></div>
+                </div>
+                <div id="field-speed" class="field" hidden>
+                  <label class="field-label" for="body-speed">Speed</label>
+                  <div class="speed">
+                    <input
+                      id="body-speed"
+                      type="range"
+                      min="0.25"
+                      max="3"
+                      step="0.05"
+                      value="1"
+                    />
+                    <output id="body-speed-value" for="body-speed">1×</output>
+                  </div>
+                </div>
+              </div>
+
+              <div class="body-colors">
+                <div class="field">
+                  <span class="field-label">Colors</span>
+                  <div class="pair">
+                    <div class="color-field">
+                      <input
+                        id="color-a"
+                        type="color"
+                        value="#ffffff"
+                        aria-labelledby="color-a-name"
+                      />
+                      <div class="color-meta">
+                        <span id="color-a-name" class="color-name">Color</span>
+                        <input
+                          id="hex-a"
+                          class="hex"
+                          type="text"
+                          value="#ffffff"
+                          maxlength="7"
+                          spellcheck="false"
+                          autocomplete="off"
+                          autocapitalize="off"
+                          aria-label="Hex value for the first color"
+                        />
+                      </div>
+                    </div>
+                    <button
+                      id="body-swap"
+                      class="swap"
+                      type="button"
+                      aria-label="Swap the two colors"
+                      title="Swap colors"
+                      hidden
+                    >
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M7 4 3 8l4 4M3 8h15M17 20l4-4-4-4M21 16H6" />
+                      </svg>
+                    </button>
+                    <div id="color-b-field" class="color-field" hidden>
+                      <input
+                        id="color-b"
+                        type="color"
+                        value="#8b5cf6"
+                        aria-labelledby="color-b-name"
+                      />
+                      <div class="color-meta">
+                        <span id="color-b-name" class="color-name"
+                          >Second color</span
+                        >
+                        <input
+                          id="hex-b"
+                          class="hex"
+                          type="text"
+                          value="#8b5cf6"
+                          maxlength="7"
+                          spellcheck="false"
+                          autocomplete="off"
+                          autocapitalize="off"
+                          aria-label="Hex value for the second color"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="field">
+                  <span id="presets-label" class="field-label"
+                    >Color pairs</span
+                  >
+                  <div
+                    id="body-presets"
+                    class="presets"
+                    role="group"
+                    aria-labelledby="presets-label"
+                  ></div>
+                  <p id="body-presets-note" class="field-note">
+                    A pair switches the effect to Gradient.
+                  </p>
+                </div>
+              </div>
+            </fieldset>
+
+            <p class="caption body-caption">
+              Esc, F1 to F12 and Delete keep showing agent status, and unused
+              agent keys stay off.
+              <span id="body-hint"></span>
+            </p>
+          </section>
+        </section>
+
+        <div class="lower">
+          <section class="assignments" aria-labelledby="assign-title">
+            <div class="section-heading">
+              <h2 id="assign-title">Key assignments</h2>
+              <span id="capacity" class="count">0 of 14 keys</span>
+            </div>
+            <p id="overflow" class="overflow" hidden></p>
+            <div id="empty" class="empty" hidden>
+              <p>No agents on the keyboard.</p>
+              <p>
+                Start a thread in T3 Code and it takes the first free key,
+                starting at Esc.
+              </p>
+            </div>
+            <div id="agents" class="agents" role="list"></div>
+          </section>
+
+          <aside class="side" aria-label="Reference">
+            <section>
+              <h2>Status colors</h2>
+              <ul class="status-list">
+                <li>
+                  <i class="swatch yellow breathe"></i>
+                  <span>Working</span><small>slow breath</small>
+                </li>
+                <li>
+                  <i class="swatch yellow draft"></i>
+                  <span>Drafting or just sent</span><small>fast pulse</small>
+                </li>
+                <li>
+                  <i class="swatch blue"></i>
+                  <span>Needs input</span><small>deep blue</small>
+                </li>
+                <li>
+                  <i class="swatch green flash"></i>
+                  <span>Finished</span><small>green blink</small>
+                </li>
+                <li>
+                  <i class="swatch red"></i><span>Error</span
+                  ><small>steady</small>
+                </li>
+                <li>
+                  <i class="swatch purple"></i><span>PR merged</span
+                  ><small>steady</small>
+                </li>
+              </ul>
+            </section>
+
+            <section class="nav-hint">
+              <h2>Open a thread</h2>
+              <p>
+                Hold <kbd>Super</kbd> and press a lit key. <kbd>Super</kbd>+<kbd
+                  >F1</kbd
+                >
+                to <kbd>F12</kbd> and <kbd>Super</kbd>+<kbd>Delete</kbd> open
+                that agent in T3 Code.
+              </p>
+              <p>
+                <kbd>Super</kbd>+<kbd>`</kbd>, the key below Esc, opens the Esc
+                agent. <kbd>Super</kbd>+<kbd>Esc</kbd> opens the system menu.
+                Dark keys, simulation keys and unsent drafts do nothing.
+              </p>
+            </section>
+
+            <section class="bridge">
+              <h2>Draft bridge</h2>
+              <p id="bridge-status" class="bridge-status">
+                Draft bridge disconnected
+              </p>
+              <button id="bridge" type="button">Copy draft bridge</button>
+              <details>
+                <summary>How it connects</summary>
+                <p>
+                  The installed desktop integration reports drafts after T3 Code
+                  is reopened through its normal launcher. For a browser-based
+                  T3 session, copy the bridge and run it once in the developer
+                  console. It sends only a thread ID and drafting events.
+                </p>
+              </details>
+            </section>
+          </aside>
+        </div>
+      </main>
+
+      <footer>
+        <span id="source-status">Connecting to T3 Code…</span>
+      </footer>
+    </div>
+    <script type="module" src="/app.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,4 @@
+# Grant the active desktop user access to the AK820 Pro vendor interfaces only.
+SUBSYSTEM=="hidraw", KERNEL=="hidraw*", ATTRS{idVendor}=="0c45", ATTRS{idProduct}=="8009", ENV{T3_BOARD_AK820}="1"
+SUBSYSTEM=="hidraw", ENV{T3_BOARD_AK820}=="1", ATTRS{bInterfaceNumber}=="02", TAG+="uaccess"
+SUBSYSTEM=="hidraw", ENV{T3_BOARD_AK820}=="1", ATTRS{bInterfaceNumber}=="03", TAG+="uaccess"
