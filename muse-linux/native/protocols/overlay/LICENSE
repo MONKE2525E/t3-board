@@ -1,0 +1,75 @@
+Vendored Wayland protocol XML for muse-control-overlay.
+
+Files in this directory are XML and this license only. Root
+scripts/native-build.cjs runs wayland-scanner and writes C/H into
+native/generated/overlay/.
+
+wlr-layer-shell-unstable-v1.xml
+  Upstream: https://gitlab.freedesktop.org/wlroots/wlr-protocols
+  Path: unstable/wlr-layer-shell-unstable-v1.xml
+  Pinned fetch: 2026-10-06
+  SHA256: 87e0b9c837aecd6977f76f3c47d73088b7159871f5d979dc1840f6cadb5e2ed8
+  License: MIT-style (Drew DeVault, 2017), as in the XML copyright:
+
+  Copyright © 2017 Drew DeVault
+
+  Permission to use, copy, modify, distribute, and sell this
+  software and its documentation for any purpose is hereby granted
+  without fee, provided that the above copyright notice appear in
+  all copies and that both that copyright notice and this permission
+  notice appear in supporting documentation, and that the name of
+  the copyright holders not be used in advertising or publicity
+  pertaining to distribution of the software without specific,
+  written prior permission.  The copyright holders make no
+  representations about the suitability of this software for any
+  purpose.  It is provided "as is" without express or implied
+  warranty.
+
+  THE COPYRIGHT HOLDERS DISCLAIM ALL WARRANTIES WITH REGARD TO THIS
+  SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+  FITNESS, IN NO EVENT SHALL THE COPYRIGHT HOLDERS BE LIABLE FOR ANY
+  SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN
+  AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
+  ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
+  THIS SOFTWARE.
+
+xdg-shell.xml
+  Upstream: https://gitlab.freedesktop.org/wayland/wayland-protocols
+  Path: stable/xdg-shell/xdg-shell.xml
+  Also identical to the installed copy at
+  /usr/share/wayland-protocols/stable/xdg-shell/xdg-shell.xml
+  SHA256: 7ba7f9c8473deee674cb1f154a18abd0bb0cc072604fc055b0c15e459fc4c7df
+  Required because wlr-layer-shell get_popup references xdg_popup;
+  root links every generated overlay protocol object. Not used at runtime.
+  License: MIT (wayland-protocols COPYING / XML copyright).
+
+xdg-output-unstable-v1.xml
+  Upstream: https://gitlab.freedesktop.org/wayland/wayland-protocols
+  Path: unstable/xdg-output/xdg-output-unstable-v1.xml
+  Also identical to the installed copy at
+  /usr/share/wayland-protocols/unstable/xdg-output/xdg-output-unstable-v1.xml
+  SHA256: 363d547c3eefe8959160cac903ff90b311d4b183005557d73640d9df2cfd7f79
+  License: MIT (Red Hat Inc., 2017), as in the XML copyright and
+  wayland-protocols COPYING:
+
+  Copyright © 2017 Red Hat Inc.
+
+  Permission is hereby granted, free of charge, to any person obtaining a
+  copy of this software and associated documentation files (the "Software"),
+  to deal in the Software without restriction, including without limitation
+  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+  and/or sell copies of the Software, and to permit persons to whom the
+  Software is furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice (including the next
+  paragraph) shall be included in all copies or substantial portions of the
+  Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+  THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+  DEALINGS IN THE SOFTWARE.

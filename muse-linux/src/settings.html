@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'">
+  <title>Muse settings</title>
+  <link rel="stylesheet" href="settings.css">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="../assets/icon.png" width="28" height="28" alt="">
+        <span>Muse</span>
+      </div>
+      <div class="nav" role="tablist" aria-label="Settings" aria-orientation="vertical">
+        <button type="button" class="nav-item" role="tab" id="tab-general" aria-controls="panel-general" aria-selected="false" tabindex="-1">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 5.5h11M2.5 10.5h11" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="6" cy="5.5" r="1.4" fill="currentColor"/><circle cx="10" cy="10.5" r="1.4" fill="currentColor"/></svg>
+          General
+        </button>
+        <button type="button" class="nav-item" role="tab" id="tab-computer" aria-controls="panel-computer" aria-selected="true" tabindex="0">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.75" y="2.5" width="12.5" height="8.5" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M5 13.2h6M8 11v2.2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          Computer use
+        </button>
+        <button type="button" class="nav-item" role="tab" id="tab-files" aria-controls="panel-files" aria-selected="false" tabindex="-1">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.4 4.2h4.1l1.3 1.4h5.8v6.8H2.4z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+          File system access
+        </button>
+        <button type="button" class="nav-item" role="tab" id="tab-dictation" aria-controls="panel-dictation" aria-selected="false" tabindex="-1">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="5.6" y="1.8" width="4.8" height="7.4" rx="2.4" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M3.6 7.4a4.4 4.4 0 0 0 8.8 0M8 11.8v2.4M5.4 14.2h5.2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          Dictation
+        </button>
+        <button type="button" class="nav-item" role="tab" id="tab-shortcuts" aria-controls="panel-shortcuts" aria-selected="false" tabindex="-1">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.6" y="3.2" width="12.8" height="9.6" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M4 6.2h1.4M7.3 6.2h1.4M10.6 6.2H12M4 9.2h8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          Keyboard shortcuts
+        </button>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="top">
+        <h1 id="pane-title">Computer use</h1>
+        <button type="button" class="done" id="close" title="Back to chat. Escape also closes this page.">Back to chat</button>
+      </header>
+
+      <div class="activity" id="activity" hidden>
+        <p id="activity-label">Working</p>
+        <button type="button" class="stop" id="stop">Stop</button>
+      </div>
+
+      <div class="panes">
+        <section id="panel-general" class="pane" role="tabpanel" aria-labelledby="tab-general" hidden>
+          <p class="lead">How Muse looks and starts on this computer.</p>
+          <h2 class="section-label">App behavior</h2>
+          <div class="group">
+            <div class="row">
+              <label class="row-text" for="theme">
+                <span class="row-title">Appearance</span>
+              </label>
+              <select id="theme" data-pref="theme">
+                <option value="system">System</option>
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+              </select>
+            </div>
+            <div class="row">
+              <label class="row-text" for="start-at-login">
+                <span class="row-title">Run on startup</span>
+                <span class="row-help">Automatically open Muse when you log in to your computer</span>
+              </label>
+              <label class="switch">
+                <input type="checkbox" id="start-at-login" role="switch" data-pref="startAtLogin">
+                <span class="switch-ui"></span>
+              </label>
+            </div>
+            <div class="row">
+              <label class="row-text" for="keep-awake">
+                <span class="row-title">Keep screen awake while working</span>
+                <span class="row-help">Your screen stays awake while your agent works</span>
+              </label>
+              <label class="switch">
+                <input type="checkbox" id="keep-awake" role="switch" data-pref="keepAwake">
+                <span class="switch-ui"></span>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <section id="panel-computer" class="pane" role="tabpanel" aria-labelledby="tab-computer">
+          <p class="lead">Let Muse work in your apps, a connected browser tab or a separate desktop. Blue borders show control of your desktop. Move your mouse or press a key to pause it. Separate desktop tasks leave your mouse and workspace alone.</p>
+          <h2 class="section-label">Manage permissions</h2>
+          <div class="group">
+            <div class="row">
+              <label class="row-text" for="browser-policy">
+                <span class="row-title">Browser</span>
+                <span class="row-help">Use Muse's browser or a tab you connect below</span>
+              </label>
+              <select id="browser-policy" data-pref="browserPolicy">
+                <option value="ask">Ask every time</option>
+                <option value="allow">Always allow</option>
+                <option value="deny">Always deny</option>
+              </select>
+            </div>
+            <div class="row">
+              <label class="row-text" for="desktop-policy">
+                <span class="row-title">Apps</span>
+                <span class="row-help" id="desktop-note">Click, type, and read windows Muse is allowed to use</span>
+              </label>
+              <select id="desktop-policy" data-pref="desktopPolicy">
+                <option value="ask">Ask every time</option>
+                <option value="allow">Always allow</option>
+                <option value="deny">Always deny</option>
+              </select>
+            </div>
+            <div class="row">
+              <label class="row-text" for="command-policy">
+                <span class="row-title">Code execution</span>
+                <span class="row-help" id="command-note">Allow scripts and terminal sessions</span>
+              </label>
+              <select id="command-policy" data-pref="commandPolicy">
+                <option value="ask">Ask every time</option>
+                <option value="allow">Always allow</option>
+                <option value="deny">Always deny</option>
+              </select>
+            </div>
+          </div>
+
+          <h2 class="section-label">Control sessions</h2>
+          <div class="group">
+            <div class="row" id="control-recovery-row" hidden>
+              <div class="row-text">
+                <span class="row-title" id="control-recovery-title">Control paused</span>
+                <span class="row-help" id="control-recovery-status" aria-live="polite">Inspect the current state before continuing.</span>
+              </div>
+              <button type="button" id="resume-control">Resume</button>
+            </div>
+            <div class="row">
+              <div class="row-text">
+                <span class="row-title">Connected browser</span>
+                <span class="row-help" id="browser-connection-status" aria-live="polite">Use an existing Chrome tab with its current sign-in</span>
+              </div>
+              <button type="button" id="connect-browser">Connect Chrome</button>
+              <button type="button" id="disconnect-browser" hidden>Disconnect</button>
+            </div>
+            <div class="connection-setup" id="browser-connection-setup" hidden>
+              <p>In Chrome, open <code>chrome://inspect/#remote-debugging</code> and enable remote debugging. Then connect here and allow Chrome's connection request.</p>
+              <button type="button" id="retry-browser">Try again</button>
+            </div>
+            <div class="tab-picker" id="browser-tab-picker" hidden role="group" aria-label="Choose a browser tab"></div>
+            <div class="row">
+              <div class="row-text">
+                <span class="row-title">Separate desktop</span>
+                <span class="row-help" id="isolation-status" aria-live="polite">Private app input with fresh profiles. No desktop viewer yet.</span>
+              </div>
+              <button type="button" id="prepare-isolation">Set up</button>
+            </div>
+          </div>
+
+          <h2 class="section-label">Blocked apps</h2>
+          <p class="hint">Muse can't see or use apps you add here.</p>
+          <div class="group" id="blocked-group">
+            <div id="blocked-list"></div>
+            <div class="row">
+              <span class="row-title">Add app</span>
+              <button type="button" id="add-app">Add</button>
+            </div>
+          </div>
+        </section>
+
+        <section id="panel-files" class="pane" role="tabpanel" aria-labelledby="tab-files" hidden>
+          <p class="lead">Let Muse read the files and folders you grant. Writes still follow the approval below.</p>
+          <h2 class="section-label">Files and Folders</h2>
+          <div class="group">
+            <div class="row">
+              <div class="row-text">
+                <span class="row-title">Access</span>
+                <span class="row-help" id="folder-path">No folder selected</span>
+              </div>
+            </div>
+            <div class="row actions">
+              <button type="button" class="primary" id="choose-folder">Choose folder</button>
+              <button type="button" id="all-files">All files</button>
+              <button type="button" id="revoke-folder">Revoke access</button>
+            </div>
+            <div class="row">
+              <label class="row-text" for="remember-folder">
+                <span class="row-title">Remember this folder</span>
+                <span class="row-help">Keep the grant after you quit Muse</span>
+              </label>
+              <label class="switch">
+                <input type="checkbox" id="remember-folder" role="switch" data-pref="rememberFolder">
+                <span class="switch-ui"></span>
+              </label>
+            </div>
+            <div class="row">
+              <label class="row-text" for="file-write-policy">
+                <span class="row-title">Creating, changing, and deleting</span>
+              </label>
+              <select id="file-write-policy" data-pref="fileWritePolicy">
+                <option value="ask">Ask every time</option>
+                <option value="allow">Always allow</option>
+                <option value="deny">Always deny</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <section id="panel-dictation" class="pane" role="tabpanel" aria-labelledby="tab-dictation" hidden>
+          <p class="lead">Dictation enables Muse to turn speech to text.</p>
+          <div class="group">
+            <div class="row">
+              <label class="row-text" for="dictation-enabled">
+                <span class="row-title">Dictation</span>
+              </label>
+              <label class="switch">
+                <input type="checkbox" id="dictation-enabled" role="switch" data-pref="dictationEnabled">
+                <span class="switch-ui"></span>
+              </label>
+            </div>
+            <div class="row">
+              <label class="row-text" for="dictation-language">
+                <span class="row-title">Language</span>
+              </label>
+              <select id="dictation-language" data-pref="dictationLanguage">
+                <option value="auto">Detect language</option>
+                <option value="en">English</option>
+                <option value="es">Spanish</option>
+                <option value="fr">French</option>
+                <option value="de">German</option>
+                <option value="it">Italian</option>
+                <option value="pt">Portuguese</option>
+                <option value="ja">Japanese</option>
+                <option value="ko">Korean</option>
+                <option value="zh">Chinese</option>
+                <option value="ru">Russian</option>
+                <option value="ar">Arabic</option>
+                <option value="hi">Hindi</option>
+                <option value="nl">Dutch</option>
+                <option value="pl">Polish</option>
+                <option value="uk">Ukrainian</option>
+              </select>
+            </div>
+            <div class="row">
+              <label class="row-text" for="dictation-auto-send">
+                <span class="row-title">Automatically send</span>
+                <span class="row-help">Muse sends your message when you finish dictating</span>
+              </label>
+              <label class="switch">
+                <input type="checkbox" id="dictation-auto-send" role="switch" data-pref="dictationAutoSend">
+                <span class="switch-ui"></span>
+              </label>
+            </div>
+          </div>
+
+          <h2 class="section-label">During dictation</h2>
+          <div class="group">
+            <div class="row" id="speech-row">
+              <div class="row-text">
+                <span class="row-title" id="speech-title">Speech setup</span>
+                <span class="row-help" id="speech-detail">Download a local model to type with your voice</span>
+              </div>
+              <button type="button" id="speech-action">Download</button>
+            </div>
+            <div class="row" id="speech-progress-row" hidden>
+              <div class="row-text">
+                <span class="row-title">Downloading</span>
+                <span class="row-help" id="speech-progress-label">0%</span>
+              </div>
+              <progress id="speech-progress" max="100" value="0"></progress>
+            </div>
+            <div class="row" id="dictate-row">
+              <div class="row-text">
+                <span class="row-title">Microphone</span>
+                <span class="row-help" id="dictation-status">Ready when the speech model is installed</span>
+              </div>
+              <div class="cluster">
+                <button type="button" id="dictate">Start dictation</button>
+                <button type="button" id="cancel-dictation" hidden>Cancel</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="panel-shortcuts" class="pane" role="tabpanel" aria-labelledby="tab-shortcuts" hidden>
+          <p class="lead">Choose keys that work while Muse is running.</p>
+          <h2 class="section-label">Shortcuts</h2>
+          <div class="group">
+            <div class="row">
+              <div class="row-text">
+                <span class="row-title">Quick Chat</span>
+                <span class="row-help" id="quick-shortcut-status">Bring Muse to the front</span>
+              </div>
+              <button type="button" class="shortcut" id="quick-shortcut" aria-label="Quick Chat shortcut">Off</button>
+            </div>
+            <div class="row">
+              <div class="row-text">
+                <span class="row-title">Dictation</span>
+                <span class="row-help" id="dictation-shortcut-status">Start and stop typing with your voice</span>
+              </div>
+              <button type="button" class="shortcut" id="dictation-shortcut" aria-label="Dictation shortcut">Off</button>
+            </div>
+          </div>
+        </section>
+
+        <details class="about">
+          <summary>About this device</summary>
+          <p id="about-version"></p>
+          <p id="about-connection"></p>
+          <p id="about-limits"></p>
+        </details>
+      </div>
+
+      <p class="error" id="error" role="alert"></p>
+    </div>
+  </div>
+
+  <dialog id="app-picker" aria-labelledby="app-picker-title">
+    <form method="dialog" class="picker">
+      <h2 id="app-picker-title">Add app</h2>
+      <p class="hint">Choose an app Muse should never see or control. Running apps already blocked are omitted.</p>
+      <div id="app-picker-list" class="picker-list"></div>
+      <p class="hint" id="app-picker-empty" hidden>Open the apps you want to block, then try again.</p>
+      <menu>
+        <button type="submit" id="app-picker-close" value="cancel">Close</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <script src="settings.js"></script>
+</body>
+</html>

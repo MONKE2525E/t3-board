@@ -1,0 +1,96 @@
+{
+  "name": "muse-linux",
+  "version": "0.6.0",
+  "description": "An unofficial Linux desktop client for the Muse web app",
+  "productName": "Muse for Linux",
+  "private": true,
+  "main": "src/main.cjs",
+  "author": "Muse Linux contributors",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "check": "node -e \"const {execFileSync}=require('node:child_process');const {globSync}=require('node:fs');const files=globSync('{src,scripts,tests}/**/*.{cjs,js}').sort();if(!files.length)throw new Error('no scripts to check');for (const file of files)execFileSync(process.execPath,['--check',file],{stdio:'inherit'});\"",
+    "lint": "eslint src scripts tests",
+    "test": "node --test tests",
+    "native:build": "node scripts/native-build.cjs",
+    "whisper:build": "node scripts/whisper-build.cjs",
+    "build:helpers": "node scripts/native-build.cjs && node scripts/whisper-build.cjs",
+    "build": "electron-builder --linux AppImage deb --x64 --publish never",
+    "install:local": "node scripts/install.cjs"
+  },
+  "devDependencies": {
+    "electron": "44.5.1",
+    "electron-builder": "26.15.3",
+    "eslint": "9.39.4"
+  },
+  "build": {
+    "appId": "io.muse.linux",
+    "productName": "Muse for Linux",
+    "executableName": "muse-linux",
+    "asar": true,
+    "files": [
+      "src/**",
+      "assets/**",
+      "package.json",
+      "THIRD_PARTY.md"
+    ],
+    "extraResources": [
+      {
+        "from": "native/bin",
+        "to": "native",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "directories": {
+      "output": "dist",
+      "buildResources": "assets"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Network",
+      "icon": "assets/icon.png",
+      "artifactName": "Muse-for-Linux-${version}-${arch}.${ext}",
+      "desktop": {
+        "entry": {
+          "Name": "Muse for Linux",
+          "Comment": "Chat with Muse",
+          "StartupWMClass": "io.muse.linux"
+        }
+      },
+      "syncDesktopName": true
+    },
+    "deb": {
+      "maintainer": "Muse Linux contributors",
+      "fpm": [
+        "--deb-compression-level",
+        "9"
+      ],
+      "depends": [
+        "libgtk-3-0",
+        "libnotify4",
+        "libnss3",
+        "libxss1",
+        "libxtst6",
+        "xdg-utils",
+        "libatspi2.0-0",
+        "libuuid1",
+        "libsecret-1-0",
+        "libwayland-client0",
+        "libcairo2",
+        "libjson-glib-1.0-0",
+        "libxkbcommon0",
+        "libglib2.0-bin"
+      ]
+    }
+  },
+  "homepage": "https://muse.ai/",
+  "desktopName": "io.muse.linux.desktop",
+  "dependencies": {
+    "ws": "8.22.0"
+  }
+}

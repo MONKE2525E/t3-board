@@ -1,0 +1,39 @@
+Vendored Wayland protocol XML for muse-keyboard.
+
+Files in this directory are XML and this license only. Root
+scripts/native-build.cjs runs wayland-scanner and writes C/H into
+native/generated/keyboard/.
+
+virtual-keyboard-unstable-v1.xml
+  Official protocol: virtual_keyboard_unstable_v1
+  Upstream: https://gitlab.freedesktop.org/wayland/wayland-protocols
+  Path: unstable/virtual-keyboard/virtual-keyboard-unstable-v1.xml
+  Identical copy used by wtype and by Hyprland
+  (zwp_virtual_keyboard_manager_v1 / zwp_virtual_keyboard_v1).
+  SHA256: 7ad7870003ecd592cae47dc19d277a609b7f18fd7b7be012623cf3225a7294f5
+  License: MIT (Kristian Høgsberg, Intel, Collabora, Purism SPC 2018),
+  as in the XML copyright and wayland-protocols COPYING:
+
+  Copyright © 2008-2011  Kristian Høgsberg
+  Copyright © 2010-2013  Intel Corporation
+  Copyright © 2012-2013  Collabora, Ltd.
+  Copyright © 2018       Purism SPC
+
+  Permission is hereby granted, free of charge, to any person obtaining a
+  copy of this software and associated documentation files (the "Software"),
+  to deal in the Software without restriction, including without limitation
+  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+  and/or sell copies of the Software, and to permit persons to whom the
+  Software is furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice (including the next
+  paragraph) shall be included in all copies or substantial portions of the
+  Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+  THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+  DEALINGS IN THE SOFTWARE.
