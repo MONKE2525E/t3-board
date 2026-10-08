@@ -27,7 +27,7 @@ async function jump(threadId) {
   const environmentId = readFileSync(environmentPath, "utf8").trim();
   if (
     !/^[a-zA-Z0-9_-]{1,160}$/.test(environmentId) ||
-    !/^[a-zA-Z0-9_-]{1,160}$/.test(threadId)
+    !/^(?=.{1,160}$)(?:(?:thread|mcp):)?[a-zA-Z0-9_-]+$/.test(threadId)
   )
     throw new Error("Invalid thread destination.");
   const path = `/${encodeURIComponent(environmentId)}/${encodeURIComponent(threadId)}`;

@@ -81,6 +81,13 @@ test("draft presence follows T3 hash routes and survives composer blur without e
     hasDraft: false,
   });
   assert.equal(snapshot("#/settings", "anything"), null);
+  for (const id of ["thread:created-a", "mcp:created-b"]) {
+    assert.deepEqual(snapshot(`#/env/${encodeURIComponent(id)}`, "draft"), {
+      id,
+      hasDraft: true,
+    });
+  }
+  assert.equal(snapshot("#/env/native%3Achild", "draft"), null);
 });
 
 test("automatic composer tracking clears reservations and reconnects after token rotation", async () => {

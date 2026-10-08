@@ -31,3 +31,48 @@ test("draft placeholders, provider-native children, and invalid keys cannot navi
   assert.throws(() => assignedThread(board.slots(), "F13"), /Invalid/);
   assert.throws(() => assignedThread(board.slots(), "../F1"), /Invalid/);
 });
+
+test("shortcuts accept T3 thread namespaces but reject synthetic and unsafe IDs", () => {
+  for (const id of [
+    "legacy-a",
+    "thread:created-a",
+    "mcp:created-b",
+    "thread:" + "a".repeat(153),
+  ]) {
+    const board = new Board();
+    board.reconcile([
+      {
+        id,
+        title: "Fixture",
+        project: "Test",
+        status: "working",
+        updatedAt: "now",
+      },
+    ]);
+    assert.equal(assignedThread(board.slots(), "Esc"), id);
+  }
+  for (const id of [
+    "draft:a",
+    "demo:a",
+    "native:a",
+    "other:a",
+    "mcp:",
+    "thread:a:b",
+    "thread:../a",
+    "thread:a/b",
+    "thread:a%2Fb",
+    "thread:" + "a".repeat(154),
+  ]) {
+    const board = new Board();
+    board.reconcile([
+      {
+        id,
+        title: "Fixture",
+        project: "Test",
+        status: "working",
+        updatedAt: "now",
+      },
+    ]);
+    assert.equal(assignedThread(board.slots(), "Esc"), null, id);
+  }
+});
