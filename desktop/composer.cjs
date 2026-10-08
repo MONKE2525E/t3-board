@@ -8,7 +8,8 @@ function composerSnapshot() {
   const parts = pathname.split("/").filter(Boolean);
   if (parts.length !== 2) return null;
   const threadId = decodeURIComponent(parts[1]);
-  if (!/^[a-zA-Z0-9_-]{1,160}$/.test(threadId)) return null;
+  if (!/^(?=.{1,160}$)(?:(?:thread|mcp):)?[a-zA-Z0-9_-]+$/.test(threadId))
+    return null;
   const field = document.querySelector('[data-testid="composer-editor"]');
   if (!field) return null;
   return {
