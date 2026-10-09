@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   BODY_KEYS,
+  BODY_MODES,
   DEFAULT_BODY_EFFECT,
   effectColor,
   validateBodyEffect,
@@ -74,7 +75,7 @@ test("body effects cannot overwrite assigned or unassigned status LEDs", () => {
     Array.from(baseline.subarray(19 * 4 + 1, 19 * 4 + 4)),
     [204, 204, 204],
   );
-  for (const mode of ["solid", "gradient", "wave", "breathe"] as const) {
+  for (const mode of BODY_MODES) {
     const frame = board.frame(now, 0.8, { ...gradient, mode });
     for (const key of TOP_ROW)
       assert.deepEqual(
@@ -142,4 +143,72 @@ test("invalid effects cannot enter saved settings or frame generation", () => {
     { ...gradient, speed: Infinity },
   ])
     assert.throws(() => validateBodyEffect(value));
+});
+
+test("rainbow spans RGB hues and follows direction; spectrum cycles all keys together", () => {
+  const rainbow: BodyEffect = { ...gradient, mode: "rainbow" };
+  assert.deepEqual(effectColor(rainbow, { x: 0, y: 0 }, 0), [255, 0, 0]);
+  assert.deepEqual(effectColor(rainbow, { x: 1 / 3, y: 0 }, 0), [0, 255, 0]);
+  assert.deepEqual(effectColor(rainbow, { x: 2 / 3, y: 0 }, 0), [0, 0, 255]);
+  assert.deepEqual(
+    effectColor({ ...rainbow, direction: "vertical" }, { x: 0, y: 1 / 3 }, 0),
+    [0, 255, 0],
+  );
+  assert.deepEqual(
+    effectColor({ ...rainbow, direction: "diagonal" }, { x: 2 / 3, y: 0 }, 0),
+    [0, 255, 0],
+  );
+  const spectrum: BodyEffect = { ...rainbow, mode: "spectrum" };
+  assert.deepEqual(
+    effectColor(spectrum, { x: 0, y: 0 }, 2000),
+    effectColor(spectrum, { x: 1, y: 1 }, 2000),
+  );
+  assert.notDeepEqual(
+    effectColor(spectrum, { x: 0, y: 0 }, 0),
+    effectColor(spectrum, { x: 0, y: 0 }, 2000),
+  );
+  assert.deepEqual(
+    effectColor(
+      { ...rainbow, colorA: "#000000", colorB: "#000000" },
+      { x: 0, y: 0 },
+      0,
+    ),
+    [255, 0, 0],
+  );
+});
+
+test("new modes loop smoothly, honor speed and brightness, and save valid settings", () => {
+  for (const mode of ["rainbow", "spectrum", "chase"] as const) {
+    const effect: BodyEffect = { ...gradient, mode };
+    assert.deepEqual(validateBodyEffect(effect), effect);
+    const point = { x: 0.3, y: 0.6 };
+    assert.deepEqual(
+      effectColor(effect, point, 0),
+      effectColor(effect, point, 8000),
+    );
+    assert.deepEqual(
+      effectColor(effect, point, 2000),
+      effectColor({ ...effect, speed: 2 }, point, 1000),
+    );
+    assert.deepEqual(effectColor(effect, point, 2000, 0), [0, 0, 0]);
+    const full = effectColor(effect, point, 2000);
+    assert.ok(
+      effectColor(effect, point, 2000, 0.5).every(
+        (v, i) => Math.abs(v - full[i]! * 0.5) <= 1,
+      ),
+    );
+    let previous = effectColor(effect, point, 0);
+    for (let t = 10; t <= 8000; t += 10) {
+      const next = effectColor(effect, point, t);
+      assert.ok(next.every((v, i) => Math.abs(v - previous[i]!) <= 8));
+      previous = next;
+    }
+  }
+});
+
+test("chase has a bright moving band over a dim color pair", () => {
+  const chase: BodyEffect = { ...gradient, mode: "chase" };
+  assert.deepEqual(effectColor(chase, { x: 0, y: 0 }, 0), [255, 0, 0]);
+  assert.ok(Math.max(...effectColor(chase, { x: 0.5, y: 0 }, 0)) < 10);
+  assert.deepEqual(effectColor(chase, { x: 0.5, y: 0 }, 4000), [255, 0, 255]);
 });

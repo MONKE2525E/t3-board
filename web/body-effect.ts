@@ -24,6 +24,21 @@ export const MODES: { id: BodyMode; label: string; note: string }[] = [
     note: "Color bands move across the board with a dark gap between them.",
   },
   { id: "breathe", label: "Breathe", note: "The gradient fades in and out." },
+  {
+    id: "rainbow",
+    label: "Rainbow",
+    note: "A full spectrum flows across the board.",
+  },
+  {
+    id: "spectrum",
+    label: "Spectrum Cycle",
+    note: "Every body key cycles through the spectrum together.",
+  },
+  {
+    id: "chase",
+    label: "Chase",
+    note: "A bright band sweeps through your color pair.",
+  },
 ];
 
 export const DIRECTIONS: {

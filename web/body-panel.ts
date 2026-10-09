@@ -1,6 +1,7 @@
 import {
   DEFAULT_BODY_EFFECT,
   effectAnimated,
+  effectSpectrum,
   validateBodyEffect,
   type BodyEffect,
 } from "../src/effects.ts";
@@ -265,6 +266,7 @@ export function initBodyPanel(deps: BodyPanelDeps) {
   function renderControls() {
     const solid = effect.mode === "solid";
     const animated = effectAnimated(effect);
+    const spectrum = effectSpectrum(effect);
     for (const input of modeInputs) input.checked = input.value === effect.mode;
     setText(
       $("mode-note"),
@@ -272,8 +274,9 @@ export function initBodyPanel(deps: BodyPanelDeps) {
     );
     for (const input of directionInputs)
       input.checked = input.value === effect.direction;
-    $("field-direction").hidden = solid;
+    $("field-direction").hidden = solid || effect.mode === "spectrum";
     $("field-speed").hidden = !animated;
+    $("body-colors").hidden = spectrum;
     $("color-b-field").hidden = solid;
     $("body-swap").hidden = solid;
     setText($("color-a-name"), solid ? "Color" : "First color");
@@ -295,6 +298,7 @@ export function initBodyPanel(deps: BodyPanelDeps) {
       button.setAttribute("aria-pressed", String(on));
     }
     $("body-summary").style.setProperty("--a", effect.colorA);
+    $("body-summary").classList.toggle("spectrum", spectrum);
     $("body-summary").style.setProperty(
       "--b",
       solid ? effect.colorA : effect.colorB,

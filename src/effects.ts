@@ -12,7 +12,16 @@ export const BODY_KEYS = bodyGeometry.map((key) => ({
   y: (key.y + key.h / 2 - minY) / (maxY - minY),
 }));
 
-export type BodyMode = "solid" | "gradient" | "wave" | "breathe";
+export const BODY_MODES = [
+  "solid",
+  "gradient",
+  "wave",
+  "breathe",
+  "rainbow",
+  "spectrum",
+  "chase",
+] as const;
+export type BodyMode = (typeof BODY_MODES)[number];
 export type GradientDirection = "horizontal" | "vertical" | "diagonal";
 export interface BodyEffect {
   mode: BodyMode;
@@ -34,7 +43,7 @@ export function validateBodyEffect(value: unknown): BodyEffect {
     throw new Error("Invalid body effect.");
   const v = value as Record<string, unknown>;
   if (
-    !["solid", "gradient", "wave", "breathe"].includes(String(v.mode)) ||
+    !BODY_MODES.some((mode) => mode === v.mode) ||
     !["horizontal", "vertical", "diagonal"].includes(String(v.direction)) ||
     typeof v.colorA !== "string" ||
     !/^#[0-9a-f]{6}$/i.test(v.colorA) ||
@@ -66,7 +75,24 @@ const colorMix = (position: number) => {
   return t * t * (3 - 2 * t);
 };
 export const effectAnimated = (effect: BodyEffect) =>
-  effect.mode === "wave" || effect.mode === "breathe";
+  effect.mode !== "solid" && effect.mode !== "gradient";
+export const effectSpectrum = (effect: BodyEffect) =>
+  effect.mode === "rainbow" || effect.mode === "spectrum";
+
+/** Fully saturated RGB hue, wrapped so the cycle has no seam. */
+const spectrumColor = (turns: number): RGB => {
+  const hue = (((turns % 1) + 1) % 1) * 6;
+  const secondary = 1 - Math.abs((hue % 2) - 1);
+  const colors = [
+    [1, secondary, 0],
+    [secondary, 1, 0],
+    [0, 1, secondary],
+    [0, secondary, 1],
+    [secondary, 0, 1],
+    [1, 0, secondary],
+  ];
+  return colors[Math.floor(hue)]!.map((v) => v * 255) as unknown as RGB;
+};
 /** Position is the physical key center normalized across the keyboard, from 0 to 1. */
 export function effectColor(
   effect: BodyEffect,
@@ -81,6 +107,12 @@ export function effectColor(
         ? clamp((position.x + position.y) / 2)
         : clamp(position.x);
   const phase = (elapsedMs * effect.speed * Math.PI * 2) / 8000;
+  if (effectSpectrum(effect)) {
+    const hue = (effect.mode === "rainbow" ? point : 0) - phase / (Math.PI * 2);
+    return spectrumColor(hue).map((v) =>
+      Math.round(v * clamp(brightness)),
+    ) as unknown as RGB;
+  }
   const positionMix =
     effect.mode === "solid"
       ? 0
@@ -93,7 +125,10 @@ export function effectColor(
       ? 0.025 + (0.975 * (1 - Math.cos(phase))) / 2
       : effect.mode === "wave"
         ? 1 - 0.95 * Math.sin(positionMix * Math.PI) ** 8
-        : 1;
+        : effect.mode === "chase"
+          ? 0.025 +
+            0.975 * ((1 + Math.cos(point * Math.PI * 2 - phase)) / 2) ** 12
+          : 1;
   const a = rgb(effect.colorA),
     b = rgb(effect.colorB);
   const mixed = a.map((v, i) => v + (b[i]! - v) * mix);
