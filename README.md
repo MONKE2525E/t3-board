@@ -50,7 +50,7 @@ Purple uses the merge state and timestamp in T3's linked PR snapshot. T3 must re
 
 ## Body lighting
 
-Choose the lighting for the keys below the agent row. Solid uses one custom color. Gradient blends two custom colors across the physical key positions. Wave moves that blend across the board, and Breathe slowly dims and brightens a two-color gradient. Choose a horizontal, vertical, or diagonal direction for the gradient modes. Animated effects have a speed from 0.25x to 3x, with an eight-second cycle at 1x.
+Choose the lighting for the keys below the agent row. Solid uses one custom color. Gradient blends two custom colors across the physical key positions. Wave moves that blend across the board, and Breathe slowly dims and brightens a two-color gradient. Rainbow moves a full spectrum across the board. Spectrum Cycle changes every body key's hue together. Chase sweeps a bright band through your color pair. Choose a horizontal, vertical, or diagonal direction for spatial effects. Rainbow and Spectrum Cycle use their own spectrum and hide the color controls. Animated effects have a speed from 0.25x to 3x, with an eight-second cycle at 1x.
 
 Gradients hold each chosen color across a wider region, with a smooth transition through the middle. Blended colors retain their intensity. Wave adds a dark gap between its moving bands so similar colors still show clear motion. Breathe dims to 2.5% between peaks. The preview and keyboard use the same animation clock.
 

@@ -77,7 +77,7 @@ test("body-effect API authenticates, validates, saves, and survives a service re
     const { token } = await (await fetch(`${origin}/api/session`)).json();
     const effect = {
       ...DEFAULT_BODY_EFFECT,
-      mode: "wave",
+      mode: "rainbow",
       colorA: "#FF3300",
       colorB: "#0088ff",
       direction: "diagonal",
@@ -109,6 +109,10 @@ test("body-effect API authenticates, validates, saves, and survives a service re
     assert.equal((await read()).brightness, 0.55);
     assert.equal((await post(DEFAULT_BODY_EFFECT, token)).status, 401);
     const fresh = await (await fetch(`${origin}/api/session`)).json();
+    for (const mode of ["spectrum", "chase"]) {
+      assert.equal((await post({ ...effect, mode }, fresh.token)).status, 200);
+      assert.equal((await read()).bodyEffect.mode, mode);
+    }
     assert.equal((await post(DEFAULT_BODY_EFFECT, fresh.token)).status, 200);
     assert.deepEqual((await read()).bodyEffect, DEFAULT_BODY_EFFECT);
   } finally {
