@@ -21,7 +21,17 @@ interface State {
   slots: Slot[];
   overflow: number;
   keyboard: KeyboardState;
-  source: { connected: boolean; error: string | null };
+  source: {
+    connected: boolean;
+    error: string | null;
+    databases?: {
+      label: string;
+      connected: boolean;
+      error: string | null;
+      stale: boolean;
+      staleForMs: number;
+    }[];
+  };
   bridge: { connected: boolean };
   /** Missing when the board service predates body lighting. */
   bodyEffect?: unknown;
@@ -219,6 +229,11 @@ function openHint(slot: Slot, demo: boolean) {
   if (demo) return `Example agent. ${shortcut} does not open simulation keys.`;
   if (slot.agent?.id.startsWith("draft:"))
     return `Unsent draft. ${shortcut} opens it once sent.`;
+  if (
+    slot.agent?.id.startsWith("source:") ||
+    slot.agent?.id.startsWith("grok-bot:")
+  )
+    return "Open this thread in its app. Keyboard navigation is unavailable.";
   return `${shortcut} opens this thread.`;
 }
 
@@ -384,7 +399,7 @@ function renderSummary(s: State, assigned: Slot[]) {
 
 function connectionText(s: State) {
   if (s.demo) return "Simulation, keyboard untouched";
-  if (!s.source.connected) return "T3 status unavailable, lighting paused";
+  if (!s.source.connected) return "Agent status unavailable, lighting paused";
   if (s.keyboard.streaming) return "Sending lighting frames";
   if (s.keyboard.connected) return "Device connected, lighting stopped";
   return s.keyboard.perKeyVerified
@@ -394,7 +409,7 @@ function connectionText(s: State) {
 
 function startHint(s: State) {
   if (s.demo) return "Simulation never writes to the keyboard.";
-  if (!s.source.connected) return "Waiting for T3 Code status.";
+  if (!s.source.connected) return "Waiting for agent status.";
   if (!s.keyboard.perKeyVerified)
     return "Per-key hardware control is not verified yet.";
   return "";
@@ -483,8 +498,13 @@ function render(s: State, fetchedAt = panel.revision()) {
     s.demo
       ? "Example agents · live monitoring paused"
       : s.source.connected
-        ? "T3 Code connected · updates every 0.75s"
-        : "T3 Code disconnected",
+        ? `${
+            s.source.databases
+              ?.filter((db) => db.connected)
+              .map((db) => db.label)
+              .join(" + ") || "T3 Code"
+          } connected · updates every 0.75s`
+        : "Agent status disconnected",
   );
   setText(
     $("bridge-status"),
@@ -493,7 +513,18 @@ function render(s: State, fetchedAt = panel.revision()) {
   $("bridge-status").classList.toggle("on", s.bridge.connected);
   $("draft-test").hidden = !s.demo;
   $("send-test").hidden = !s.demo;
-  const error = s.source.error ?? s.keyboard.error;
+  const unavailable = s.source.databases?.filter((db) => !db.connected);
+  const staleSources = unavailable?.filter((db) => db.stale) ?? [];
+  const lastKnownWarning = staleSources.length
+    ? ` Showing last-known assignments for up to ${Math.round(staleSources[0]!.staleForMs / 1000)} seconds.`
+    : "";
+  const sourceWarning =
+    !s.demo && unavailable?.length
+      ? `${unavailable.map((db) => db.label).join(", ")} status unavailable.${lastKnownWarning}${s.source.connected ? " Other agents are still monitored." : ""}`
+      : null;
+  const error = [s.source.error, s.keyboard.error, sourceWarning]
+    .filter((message): message is string => typeof message === "string")
+    .join(" ");
   if (error) {
     statusNotice = error;
     notice(error);
