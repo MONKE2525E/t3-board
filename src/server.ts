@@ -13,7 +13,8 @@ import { fileURLToPath } from "node:url";
 import { Board, LAYOUT } from "./model.ts";
 import { Keyboard } from "./keyboard.ts";
 import { Lighting } from "./lighting.ts";
-import { LocalT3Source, demoAgents } from "./source.ts";
+import { demoAgents } from "./source.ts";
+import { LocalSources } from "./sources.ts";
 import {
   DEFAULT_BODY_EFFECT,
   validateBodyEffect,
@@ -49,7 +50,7 @@ try {
 const token = randomBytes(32).toString("hex");
 const board = new Board();
 const keyboard = new Keyboard();
-const source = new LocalT3Source();
+const source = new LocalSources();
 let demo = process.env.T3_BOARD_DEMO === "1";
 let sourceError: string | null = null;
 let lastReadAt: number | null = null;
@@ -76,13 +77,24 @@ function saveSettings() {
 const examples = demoAgents();
 function refresh() {
   try {
-    if (demo) board.reconcile(examples);
-    else board.reconcile(source.read(), Date.now(), source.ignoredThreadIds);
-    sourceError = null;
-    lastReadAt = Date.now();
+    if (demo) {
+      board.reconcile(examples);
+      sourceError = null;
+      lastReadAt = Date.now();
+      return;
+    }
+    board.reconcile(source.read(), Date.now(), source.ignoredThreadIds);
+    if (source.states.some((database) => database.connected)) {
+      sourceError = null;
+      lastReadAt = Date.now();
+    } else {
+      sourceError =
+        "Agent status is unavailable. Lighting paused. Check the local T3 Code or A3 Code database.";
+      keyboard.state.streaming = false;
+    }
   } catch {
     sourceError =
-      "T3 status is unavailable. Lighting paused. Check that T3 Code uses the supported local database.";
+      "Agent status is unavailable. Lighting paused. Check the local T3 Code or A3 Code database.";
     keyboard.state.streaming = false;
   }
 }
@@ -106,7 +118,12 @@ const state = () => ({
   layout: LAYOUT,
   overflow: board.overflow,
   keyboard: keyboard.state,
-  source: { connected: !sourceError, lastReadAt, error: sourceError },
+  source: {
+    connected: !sourceError,
+    lastReadAt,
+    error: sourceError,
+    databases: source.states,
+  },
   bridge: {
     connected: !!bridgeSeenAt && Date.now() - bridgeSeenAt < 5000,
     lastSeenAt: bridgeSeenAt,

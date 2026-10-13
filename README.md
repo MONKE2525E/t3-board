@@ -1,6 +1,6 @@
 # T3 Board
 
-A local companion that maps T3 Code agents to the AK820 Pro's Esc, F1–F12, and Delete lights.
+A local companion that maps T3 Code and A3 Code agents to the AK820 Pro's Esc, F1–F12, and Delete lights.
 
 This is a personal project by MONKE2525E. It is independent of T3 Code and AJAZZ and is not an official product or integration from either team.
 
@@ -21,6 +21,10 @@ Open <http://127.0.0.1:47831> and select **Start lighting**. Enable Simulation t
 Live monitoring reads T3's local SQLite database in read-only mode every 750 milliseconds. By default, keys represent top-level T3 threads. Hidden delegated subagents do not take keys or inflate finished counts. Empty, settled, archived, and deleted threads are omitted, along with their subagent descendants. A cancelled queued message does not mask a turn that is still running. Fourteen assignments remain stable while the app runs. Extra agents wait for an available key.
 
 Set `T3_BOARD_INCLUDE_SUBAGENTS=1` to include delegated agents too. In that mode, app-owned children count as separate threads and provider-native subagents from the current parent run count separately, without duplicating app-owned children.
+
+A3 Code (the GrokBot build) is discovered at `~/.t3-grokbot-dev/userdata/statev2.sqlite` alongside regular T3 Code. Missing installations are skipped and picked up when their database appears. A3 assignments show their app name beside the project. Thread IDs and lifecycle exclusions stay separate even when both installations contain the same IDs. One unavailable database shows a warning while healthy sources keep updating. Its last-known assignments remain for up to 90 seconds after the last successful read, then clear. Lighting pauses when no source can be read.
+
+Canonical Grok Bot chats are included even when A3 has imported native history without creating a T3 run. The board reads message IDs, roles, streaming flags, and timestamps; it never selects prompt or answer text. Fresh native assistant streams show working, completed native replies show finished, and streams without an update for 90 seconds fall back to idle. Thinking, tools, and input requests outside a T3-managed run depend on what A3 persists; the board does not contact Grok's cloud or read account credentials.
 
 A parent stays yellow while delegated background work or a monitor is pending, even after its chat turn finishes. Hidden children contribute to their parent's status without taking additional keys. Ordinary background commands and persistent tool registrations do not keep a finished agent yellow.
 
@@ -72,13 +76,15 @@ Starting lighting selects custom mode and saves one baseline palette with the bo
 
 - `T3_BOARD_PORT`: loopback HTTP port, default `47831`.
 - `T3_BOARD_DB`: alternate T3 database path; default `~/.t3/userdata/statev2.sqlite`.
+- `T3_BOARD_A3_DB`: alternate A3 database path, monitored alongside the default T3 database.
+- `T3_BOARD_DBS`: explicit database list, separated by the platform's path delimiter (`:` on Linux/macOS, `;` on Windows). Put the regular T3 database first; it keeps T3 navigation. Later entries are namespaced lighting sources and do not use the T3 navigation bridge. This overrides automatic discovery and `T3_BOARD_DB`. `T3_BOARD_DB` alone preserves single-database mode.
 - `T3_BOARD_STATE`: private settings directory; default `~/.local/state/t3-board`.
 - `T3_BOARD_DEMO=1`: start with simulation enabled.
 - `T3_BOARD_INCLUDE_SUBAGENTS=1`: include hidden delegated agents; off by default.
 
 The server binds to loopback. Device controls and composer events require a per-session token. Composer events accept T3's `t3code://app` and `t3code-dev://app` origins and loopback web previews. Cross-origin status reads and device controls are blocked. Brightness is saved locally. Key assignments currently reset on restart.
 
-T3's database schema is an internal integration. A schema change pauses lighting and displays an error. Hardware transport currently targets the FF13 variant, not every keyboard sold as AK820 Pro. See [THIRD_PARTY.md](THIRD_PARTY.md) for protocol sources.
+T3's database schema is an internal integration. An unsupported database displays an error; lighting pauses if no healthy source remains. Hardware transport currently targets the FF13 variant, not every keyboard sold as AK820 Pro. See [THIRD_PARTY.md](THIRD_PARTY.md) for protocol sources.
 
 ## Check
 
@@ -108,6 +114,8 @@ refreshes its executable when the installed Nightly app updates. Navigation is
 currently supported for `/opt/t3code-nightly-bin` on Omarchy.
 
 Run `t3-boardctl jump F1` to exercise the same action from a terminal.
+
+A3 assignments are monitored for lighting only. The installed desktop navigation and automatic draft bridge still target regular T3 Code. A3 and Grok Bot assignments do not send navigation requests to that app; open them in A3 Code.
 
 Desktop verification used an isolated Nightly instance with two synthetic
 projects. Both socket requests opened their matching project and thread through

@@ -25,6 +25,7 @@ interface ThreadRow {
 }
 export class LocalT3Source {
   private db: DatabaseSync | null = null;
+  private hasMessages = false;
   ignoredThreadIds = new Set<string>();
   readonly path: string;
   readonly includeSubagents: boolean;
@@ -37,7 +38,14 @@ export class LocalT3Source {
     this.includeSubagents = includeSubagents;
   }
   read(): Agent[] {
-    this.db ??= new DatabaseSync(this.path, { readOnly: true });
+    if (!this.db) {
+      this.db = new DatabaseSync(this.path, { readOnly: true });
+      this.hasMessages = !!this.db
+        .prepare(
+          "SELECT 1 FROM sqlite_master WHERE type='table' AND name='orchestration_v2_projection_messages'",
+        )
+        .get();
+    }
     this.db.exec("PRAGMA query_only = ON; PRAGMA busy_timeout = 500;");
     const lifecycle = this.db
       .prepare(
@@ -105,7 +113,7 @@ export class LocalT3Source {
           .all() as { thread_id: string }[]
       ).map((q) => q.thread_id),
     );
-    // Only titles, lifecycle records, and PR snapshots are read. Conversation content is never selected.
+    // Only titles, lifecycle metadata, and PR snapshots are read. Conversation text is never selected.
     const threads = this.db
       .prepare(
         `SELECT t.thread_id,t.title,t.payload_json,t.updated_at,
@@ -131,7 +139,8 @@ export class LocalT3Source {
       LEFT JOIN orchestration_v2_projection_runs r ON r.run_id=(
         SELECT run_id FROM orchestration_v2_projection_runs WHERE thread_id=t.thread_id ORDER BY ${RUN_ORDER} LIMIT 1)
       WHERE t.archived_at IS NULL AND t.deleted_at IS NULL
-      AND r.run_id IS NOT NULL
+      AND (r.run_id IS NOT NULL OR (${this.hasMessages ? 1 : 0}=1
+        AND t.thread_id LIKE 'grok-bot:%'))
       AND COALESCE(json_extract(t.payload_json,'$.settledOverride'),'') <> 'settled'
       AND json_extract(t.payload_json,'$.settledAt') IS NULL
       AND (${this.includeSubagents ? 1 : 0}=1 OR COALESCE(json_extract(t.payload_json,'$.lineage.relationshipToParent'),'')<>'subagent')
@@ -160,6 +169,43 @@ export class LocalT3Source {
           : t.status === "completed"
             ? "done"
             : "idle";
+      // A3 observes canonical bot chats without creating an app run. Read
+      // message lifecycle metadata only; native prompt/answer text stays private.
+      const nativeMessage =
+        this.hasMessages && t.thread_id.startsWith("grok-bot:")
+          ? (this.db
+              .prepare(
+                `SELECT message_id,role,streaming,created_at,updated_at
+            FROM orchestration_v2_projection_messages
+            WHERE thread_id=? AND run_id IS NULL
+            ORDER BY created_at DESC,message_id DESC LIMIT 1`,
+              )
+              .get(t.thread_id) as
+              | {
+                  message_id: string;
+                  role: string;
+                  streaming: number;
+                  created_at: string;
+                  updated_at: string;
+                }
+              | undefined)
+          : undefined;
+      if (!t.run_id && !nativeMessage) continue;
+      const newerNativeMessage =
+        nativeMessage &&
+        (!t.requested_at ||
+          Date.parse(nativeMessage.created_at) > Date.parse(t.requested_at)) &&
+        (status === "done" || status === "idle");
+      if (newerNativeMessage && (status === "done" || status === "idle")) {
+        status =
+          nativeMessage.role === "assistant"
+            ? nativeMessage.streaming
+              ? Date.now() - Date.parse(nativeMessage.updated_at) < 90000
+                ? "working"
+                : "idle"
+              : "done"
+            : "idle";
+      }
       // A finished turn can still own live delegated work. T3's Working
       // section keeps that parent waiting until its background tasks finish.
       if (
@@ -172,6 +218,9 @@ export class LocalT3Source {
           `SELECT snapshot_json FROM projection_thread_pull_requests WHERE thread_id=? AND source<>'stack-dismissed'`,
         )
         .all(t.thread_id) as { snapshot_json: string | null }[];
+      const activityStartedAt = newerNativeMessage
+        ? nativeMessage.created_at
+        : t.requested_at;
       const merged = merges.some((m) => {
         if (!m.snapshot_json) return false;
         const snapshot = JSON.parse(m.snapshot_json) as {
@@ -181,8 +230,8 @@ export class LocalT3Source {
         return (
           snapshot.state?.toLowerCase() === "merged" &&
           !!snapshot.mergedAt &&
-          (!t.requested_at ||
-            Date.parse(snapshot.mergedAt) >= Date.parse(t.requested_at))
+          (!activityStartedAt ||
+            Date.parse(snapshot.mergedAt) >= Date.parse(activityStartedAt))
         );
       });
       if (merged && !watching && status !== "error") status = "merged";
@@ -192,9 +241,14 @@ export class LocalT3Source {
         title: t.title || "Untitled agent",
         project: t.project,
         status,
-        runId: t.run_id ?? undefined,
-        updatedAt: t.updated_at,
-        sentAt: t.requested_at ?? undefined,
+        runId: newerNativeMessage
+          ? `native-message:${nativeMessage.message_id}`
+          : (t.run_id ?? undefined),
+        updatedAt: newerNativeMessage ? nativeMessage.updated_at : t.updated_at,
+        sentAt:
+          newerNativeMessage && status === "working"
+            ? nativeMessage.created_at
+            : (t.requested_at ?? undefined),
         parentId: payload.lineage?.parentThreadId,
       });
     }
