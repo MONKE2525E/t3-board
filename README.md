@@ -124,3 +124,19 @@ assignments, including an unassigned-key no-op. Hyprland registered all fourteen
 Super shortcuts without configuration errors. Physical shortcut input and the
 desktop workspace focus transition require the normal app to be reopened and
 were not exercised in the user's running instance.
+
+### Sleep while agents keep running
+
+`t3-boardctl sleep` turns Hyprland displays off without suspending or hibernating.
+A systemd `sleep:idle` block inhibitor keeps agents running until any keyboard or
+mouse input wakes the displays. `t3-boardctl wake` also restores displays;
+`t3-boardctl status` reports `agentSleep`. The authenticated server endpoints are
+`POST /api/sleep` and `POST /api/wake`; sleep state is never saved across restarts.
+This mode does not lock the session or require hyprlock.
+
+T3 Board sends black frames while its keyboard lighting is streaming, then resumes
+normal lighting on wake without changing saved brightness or the lighting setting.
+Other peripherals are unchanged. The installer enables Hyprland's keyboard and
+mouse DPMS wake options, including after a server crash. The inhibitor helper exits
+on server pipe closure, so even SIGKILL releases its lock. A failed DPMS wake keeps
+the inhibitor held until wake can be retried.

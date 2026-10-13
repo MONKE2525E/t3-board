@@ -12,6 +12,7 @@ import { randomBytes, timingSafeEqual } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { Board, LAYOUT } from "./model.ts";
 import { Keyboard } from "./keyboard.ts";
+import { AgentSleep, desktopSleep } from "./agent-sleep.ts";
 import { Lighting } from "./lighting.ts";
 import { demoAgents } from "./source.ts";
 import { LocalSources } from "./sources.ts";
@@ -62,6 +63,15 @@ const lighting = new Lighting(
   () => brightness,
   lightingEnabled,
 );
+const agentSleep = new AgentSleep(desktopSleep, () =>
+  lighting.ensure().catch(() => {}),
+);
+const sleepCheck = setInterval(() => {
+  if (agentSleep.active)
+    void agentSleep
+      .check()
+      .catch((error: unknown) => console.error("Agent sleep:", error));
+}, 750);
 function saveSettings() {
   writeFileSync(
     settingsPath + ".tmp",
@@ -106,7 +116,8 @@ const reconnect = setInterval(
 );
 void lighting.ensure().catch(() => {});
 const render = setInterval(() => {
-  if (!demo && !sourceError)
+  if (agentSleep.active) keyboard.queue(Buffer.alloc(512));
+  else if (!demo && !sourceError)
     keyboard.queue(board.frame(Date.now(), brightness, bodyEffect));
 }, 100);
 const state = () => ({
@@ -114,6 +125,7 @@ const state = () => ({
   brightness,
   bodyEffect,
   lightingEnabled: lighting.enabled,
+  agentSleep: agentSleep.active,
   slots: board.slots(Date.now(), brightness),
   layout: LAYOUT,
   overflow: board.overflow,
@@ -196,6 +208,7 @@ const server = createServer(async (req, res) => {
         assigned: agents.length,
         overflow: board.overflow,
         lightingEnabled: lighting.enabled,
+        agentSleep: agentSleep.active,
         streaming: keyboard.state.streaming,
         connected: keyboard.state.connected,
         sourceConnected: !sourceError,
@@ -249,6 +262,10 @@ const server = createServer(async (req, res) => {
             board.draft = null;
           }
         }
+      } else if (url.pathname === "/api/sleep") {
+        await agentSleep.sleep();
+      } else if (url.pathname === "/api/wake") {
+        await agentSleep.wake();
       } else if (url.pathname === "/api/connect") {
         await keyboard.connect(brightness);
       } else if (url.pathname === "/api/start") {
@@ -355,6 +372,11 @@ async function shutdown() {
   clearInterval(poll);
   clearInterval(reconnect);
   clearInterval(render);
+  clearInterval(sleepCheck);
+  if (agentSleep.active)
+    await agentSleep
+      .wake()
+      .catch((error: unknown) => console.error("Wake during shutdown:", error));
   await lighting.stop();
   source.close();
   server.close();

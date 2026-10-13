@@ -5,7 +5,7 @@ import { execFileSync } from "node:child_process";
 import { assignedThread } from "./navigation.ts";
 import type { Slot } from "./model.ts";
 
-const origin = "http://127.0.0.1:47831";
+const origin = `http://127.0.0.1:${process.env.T3_BOARD_PORT ?? 47831}`;
 const action = process.argv[2] ?? "status";
 
 async function request(path: string, init?: RequestInit) {
@@ -67,8 +67,7 @@ try {
           reject(new Error("T3 navigation disconnected."));
       });
     }).catch((error: NodeJS.ErrnoException) => {
-      if (error.code !== "ENOENT" && error.code !== "ECONNREFUSED")
-        throw error;
+      if (error.code !== "ENOENT" && error.code !== "ECONNREFUSED") throw error;
       throw new Error(
         "Quit T3 Code and reopen it from its launcher to enable keyboard navigation.",
       );
@@ -88,10 +87,24 @@ try {
     console.log("Opened assigned thread.");
     process.exit(0);
   }
-  if (action !== "status") {
-    if (!["toggle", "start", "stop"].includes(action))
+  if (action === "power") {
+    if ((await request("/api/summary")).agentSleep) {
+      await request("/api/wake", {
+        method: "POST",
+        headers: {
+          Authorization: "Bearer " + (await request("/api/session")).token,
+        },
+        body: "{}",
+      });
+    } else
+      execFileSync("omarchy", ["menu", "system"], {
+        stdio: "ignore",
+        timeout: 2000,
+      });
+  } else if (action !== "status") {
+    if (!["toggle", "start", "stop", "sleep", "wake"].includes(action))
       throw new Error(
-        "Usage: t3-boardctl [status|toggle|start|stop|jump Esc|F1..F12|Del]",
+        "Usage: t3-boardctl [status|toggle|start|stop|sleep|wake|power|jump Esc|F1..F12|Del]",
       );
     const state = await request("/api/summary");
     const next =
