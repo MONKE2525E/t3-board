@@ -97,7 +97,7 @@ try {
         body: "{}",
       });
     } else
-      execFileSync("omarchy", ["menu", "system"], {
+      execFileSync("omarchy", ["menu", "toggle", "system"], {
         stdio: "ignore",
         timeout: 2000,
       });

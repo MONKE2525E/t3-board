@@ -60,6 +60,13 @@ exec "$@"
     DISPLAY_STATE: display,
     INHIBITOR_PID: pidFile,
   };
+  writeFileSync(
+    join(bin, "omarchy"),
+    `#!/bin/sh
+printf "%s\n" "$@" > "$DISPLAY_STATE.menu"
+`,
+    { mode: 0o755 },
+  );
   const child = spawn(process.execPath, ["src/server.ts"], {
     env,
     stdio: "ignore",
@@ -95,6 +102,11 @@ exec "$@"
       401,
     );
     assert.equal((await cli("status")).agentSleep, false);
+    await cli("power");
+    assert.equal(
+      readFileSync(display + ".menu", "utf8"),
+      "menu\ntoggle\nsystem\n",
+    );
     assert.equal((await cli("sleep")).agentSleep, true);
     assert.equal(readFileSync(display, "utf8").trim(), "off");
     assert.equal((await cli("sleep")).agentSleep, true);
