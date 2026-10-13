@@ -18,9 +18,11 @@ export interface SleepBackend {
 
 // User services may start before the compositor imports its environment.
 function hyprlandEnv(): NodeJS.ProcessEnv {
-  if (process.env.HYPRLAND_INSTANCE_SIGNATURE) return process.env;
   const runtime = process.env.XDG_RUNTIME_DIR ?? `/run/user/${userInfo().uid}`;
   const root = join(runtime, "hypr");
+  const inherited = process.env.HYPRLAND_INSTANCE_SIGNATURE;
+  if (inherited && existsSync(join(root, inherited, ".socket.sock")))
+    return process.env;
   const instances = readdirSync(root)
     .filter((name) => existsSync(join(root, name, ".socket.sock")))
     .sort(

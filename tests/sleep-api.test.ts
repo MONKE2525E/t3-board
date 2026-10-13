@@ -24,9 +24,19 @@ test("CLI sleep/status/wake, API auth, input wake and abrupt server exit", async
   const display = join(dir, "display");
   writeFileSync(display, "on");
   const pidFile = join(dir, "inhibitor-pid");
+  const session = createServer();
+  async function openSession(name: string) {
+    const path = join(dir, "hypr", name);
+    mkdirSync(path, { recursive: true });
+    await new Promise<void>((resolve) =>
+      session.listen(join(path, ".socket.sock"), resolve),
+    );
+  }
+  await openSession("test");
   writeFileSync(
     join(bin, "hyprctl"),
     `#!/bin/sh
+printf "%s\n" "$HYPRLAND_INSTANCE_SIGNATURE" > "$DISPLAY_STATE.signature"
 if [ "$1" = "-j" ]; then
   if [ "$(cat "$DISPLAY_STATE")" = on ]; then echo '[{"dpmsStatus":true}]'; else echo '[{"dpmsStatus":false}]'; fi
 elif [ "$1" = dispatch ]; then
@@ -57,6 +67,7 @@ exec "$@"
     T3_BOARD_DEMO: "1",
     T3_BOARD_AUTOSTART: "0",
     HYPRLAND_INSTANCE_SIGNATURE: "test",
+    XDG_RUNTIME_DIR: dir,
     DISPLAY_STATE: display,
     INHIBITOR_PID: pidFile,
   };
@@ -109,12 +120,19 @@ printf "%s\n" "$@" > "$DISPLAY_STATE.menu"
     );
     assert.equal((await cli("sleep")).agentSleep, true);
     assert.equal(readFileSync(display, "utf8").trim(), "off");
+    assert.equal(readFileSync(display + ".signature", "utf8").trim(), "test");
+    await new Promise<void>((resolve) => session.close(() => resolve()));
+    await openSession("replacement");
     assert.equal((await cli("sleep")).agentSleep, true);
     writeFileSync(display, "on"); // Compositor wakes from keyboard/mouse input.
     await waitFor(async () => !(await cli("status")).agentSleep);
     assert.equal((await cli("sleep")).agentSleep, true);
     assert.equal((await cli("wake")).agentSleep, false);
     assert.equal(readFileSync(display, "utf8").trim(), "on");
+    assert.equal(
+      readFileSync(display + ".signature", "utf8").trim(),
+      "replacement",
+    );
     assert.equal((await cli("sleep")).agentSleep, true);
     const helper = Number(readFileSync(pidFile, "utf8"));
     const exited = once(child, "exit");
@@ -135,6 +153,7 @@ printf "%s\n" "$@" > "$DISPLAY_STATE.menu"
       child.kill("SIGTERM");
       await exited;
     }
+    await new Promise<void>((resolve) => session.close(() => resolve()));
     rmSync(dir, { recursive: true, force: true });
   }
 });
