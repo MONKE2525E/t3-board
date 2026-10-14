@@ -136,6 +136,7 @@ if (existsSync(shell)) cpSync(shell, shell + ".bak.t3-board." + Date.now());
 run("omarchy-shell", ["shell", "rescanPlugins"]);
 run("omarchy", ["bar", "put", "monke.t3-board", "--after", "monke.agents"]);
 run(process.execPath, [join(source, "scripts/install-navigation.mjs")]);
+run(process.execPath, [join(source, "scripts/install-agent-sleep.mjs")]);
 console.log(
   "T3 Board installed, enabled at login, and added to the Omarchy bar.",
 );
